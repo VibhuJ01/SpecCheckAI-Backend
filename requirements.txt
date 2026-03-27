@@ -1,0 +1,24 @@
+#Authentication
+pyjwt
+cryptography
+redis
+
+# ASGI
+fastapi
+uvicorn
+python-multipart
+slowapi
+
+# HTTP Requests
+httpx
+pillow
+
+# Scripts
+pydantic
+python-dotenv
+pymongo
+pytz
+
+# To identify file type/extension
+python-magic # For Linux
+# python-magic-bin # For Windows
