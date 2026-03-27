@@ -121,7 +121,6 @@ def super_admin_only(func):
     return wrapper
 
 
-
 def employee_page_permission(page_name):
     """Checks if the company admin or employee can access a page."""
 
@@ -356,7 +355,7 @@ def create_user_and_send_email(
     user_collection.insert_one(user_details)
 
     send_email = SendEmail()
-    is_successful = send_email.send_add_user_email(receiver_email=email_lower,password=password)
+    is_successful = send_email.send_add_user_email(receiver_email=email_lower, password=password)
     if not is_successful:
         user_collection.delete_one({"email": email_lower})
         return {
@@ -377,4 +376,3 @@ def compress_image(image_bytes: bytes, max_size=(768, 768), quality=70):
     buffer = io.BytesIO()
     img.save(buffer, format="JPEG", quality=quality, optimize=True)
     return buffer.getvalue()
-

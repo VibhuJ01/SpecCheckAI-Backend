@@ -4,4 +4,3 @@ scripts/__pycache__/
 .vscode
 testers/test
 !.gitignore
-

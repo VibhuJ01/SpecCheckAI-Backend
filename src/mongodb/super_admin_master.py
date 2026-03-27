@@ -61,7 +61,9 @@ class SuperAdminMaster:
             }, HTTPStatus.INTERNAL_SERVER_ERROR
 
         send_email = SendEmail()
-        is_successful = send_email.send_add_user_email(receiver_email=request_data_schema.email.lower(),password=password)
+        is_successful = send_email.send_add_user_email(
+            receiver_email=request_data_schema.email.lower(), password=password
+        )
         if not is_successful:
             self.collection.delete_one({"email": request_data_schema.email.lower()})
             return {
@@ -109,15 +111,18 @@ class SuperAdminMaster:
 
     def fetch_all_super_admins(self) -> tuple[dict[str, Any], int]:
 
-        users = list(self.collection.find({"role": UserRoles.SUPER_ADMIN.value}, {"_id": 0, "code": 1, "email": 1, "name": 1, "phone_number": 1, "is_disabled": 1}))
+        users = list(
+            self.collection.find(
+                {"role": UserRoles.SUPER_ADMIN.value},
+                {"_id": 0, "code": 1, "email": 1, "name": 1, "phone_number": 1, "is_disabled": 1},
+            )
+        )
 
         return {
             "is_successful": True,
             "user_data": users,
             "message": "Successfully Fetched the Data!",
         }, HTTPStatus.OK
-
-
 
     def disable_super_admin(
         self, disable_user_email: str, current_super_admin_email: str

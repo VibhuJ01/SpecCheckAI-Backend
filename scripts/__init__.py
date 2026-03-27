@@ -1,4 +1,5 @@
 import logging as logger
+import time
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,7 +10,6 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
 from scripts.rate_limiter import global_rate_limiter, limiter
-import time
 from src.cred import Credentials
 from src.enums import Environments
 from src.mongodb.base import BaseDatabase

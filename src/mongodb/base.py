@@ -32,8 +32,6 @@ class BaseDatabase:
 
         company_master_collection.create_index([("email", ASCENDING)], name="email_idx")
 
-      
-
         # LOG_MANAGER Collection Indexes
         log_manager_collection = cls.get_collection(MongoCollectionsNames.LOG_MANAGER)
         log_manager_collection.drop_indexes()

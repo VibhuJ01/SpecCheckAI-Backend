@@ -155,4 +155,3 @@ global_rate_limiter = GlobalRateLimiter(
     window_seconds=60,  # Time window: 1 minute
     key_prefix="speccheckai_global:global",
 )
-

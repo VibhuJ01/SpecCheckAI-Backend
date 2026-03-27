@@ -2,9 +2,7 @@ from typing import Optional, Union
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from src.enums import (
-    EmployeePermissionType
-)
+from src.enums import EmployeePermissionType
 
 
 class UserLoginRequest(BaseModel):
@@ -35,7 +33,6 @@ class CompanyDetails(BaseModel):
     city: str = Field(..., max_length=50)
     pincode: str = Field(..., max_length=10)
 
-    
     # Contact Info
     name: str = Field(..., max_length=100)
     email: str = Field(..., max_length=300)
@@ -58,14 +55,12 @@ class CompanyDetails(BaseModel):
     gst_customer_type: Optional[str] = Field(None, max_length=30)
     gst_reg_type: Optional[str] = Field(None, max_length=10)
 
-
     # Bank Info
     bank_name: Optional[str] = Field(None, max_length=100)
     account_number: Optional[str] = Field(None, max_length=30)
     branch_code: Optional[str] = Field(None, max_length=20)
     ifsc_code: Optional[str] = Field(None, max_length=30)
 
-   
 
 # Employee Master
 class EmployeePermissions(BaseModel):
@@ -107,5 +102,3 @@ class JSONSchema(BaseModel):
     instructions: str
     examples: Optional[list[Examples]] = []
     important_notes: Optional[list] = []
-
-

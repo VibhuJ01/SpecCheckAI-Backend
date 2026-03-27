@@ -4,12 +4,13 @@ from io import BytesIO
 from fastapi import APIRouter, File, Query, Request, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 
+from scripts.rate_limiter import limiter
 from src.constants import MAX_AGE_AUTH_TOKEN_SECONDS
-from src.enums import UserRoles, Environments
 from src.cred import Credentials
+from src.enums import Environments, UserRoles
 from src.mongodb.company_master import CompanyMaster
 from src.utils import requires_verification, super_admin_only
-from scripts.rate_limiter import limiter
+
 router = APIRouter()
 company_master_db = CompanyMaster()
 

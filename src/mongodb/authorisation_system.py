@@ -182,7 +182,7 @@ class AuthorisationSystem:
         send_email = SendEmail()
         otp = generate_randomised_numeric_string(length=6)
         is_successful = send_email.send_forgot_password_otp_email(receiver_email=email_lower, otp=otp)
-        
+
         if not is_successful:
             return {
                 "is_successful": False,

@@ -367,11 +367,8 @@ class SendEmail:
             </div>
         """
 
-        footer_text = (
-            "If you did not request a password reset, you can safely ignore this email."
-        )
+        footer_text = "If you did not request a password reset, you can safely ignore this email."
         return self._wrap_email(content_html, footer_text)
-
 
     def send_add_user_email(self, receiver_email: str, password: str) -> bool:
         subject = f"Welcome to {self.BRAND_NAME}"

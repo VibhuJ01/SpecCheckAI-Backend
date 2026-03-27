@@ -51,4 +51,3 @@ class LogActionType(str, Enum):
     DISABLE = "disable"
     ENABLE = "enable"
     UPLOADED = "uploaded"
-

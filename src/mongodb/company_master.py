@@ -25,9 +25,15 @@ class CompanyMaster:
     def add_company(self, request_data: dict, current_user_email: str, company_logo=None) -> tuple[dict[str, Any], int]:
         """Add a new company record to the database."""
 
-        request_data["is_back_date_booking_enabled"] = request_data.get("is_back_date_booking_enabled", "false").lower() == "true"
-        request_data["is_ai_file_upload_enabled"] = request_data.get("is_ai_file_upload_enabled", "false").lower() == "true"
-        request_data["is_ai_voice_assistant_enabled"] = request_data.get("is_ai_voice_assistant_enabled", "false").lower() == "true"
+        request_data["is_back_date_booking_enabled"] = (
+            request_data.get("is_back_date_booking_enabled", "false").lower() == "true"
+        )
+        request_data["is_ai_file_upload_enabled"] = (
+            request_data.get("is_ai_file_upload_enabled", "false").lower() == "true"
+        )
+        request_data["is_ai_voice_assistant_enabled"] = (
+            request_data.get("is_ai_voice_assistant_enabled", "false").lower() == "true"
+        )
 
         try:
             validated_data = CompanyDetails.model_validate(request_data)
@@ -106,9 +112,15 @@ class CompanyMaster:
     ) -> tuple[dict[str, Any], int]:
         """Update existing company details."""
 
-        request_data["is_back_date_booking_enabled"] = request_data.get("is_back_date_booking_enabled", "false").lower() == "true"
-        request_data["is_ai_file_upload_enabled"] = request_data.get("is_ai_file_upload_enabled", "false").lower() == "true"
-        request_data["is_ai_voice_assistant_enabled"] = request_data.get("is_ai_voice_assistant_enabled", "false").lower() == "true"
+        request_data["is_back_date_booking_enabled"] = (
+            request_data.get("is_back_date_booking_enabled", "false").lower() == "true"
+        )
+        request_data["is_ai_file_upload_enabled"] = (
+            request_data.get("is_ai_file_upload_enabled", "false").lower() == "true"
+        )
+        request_data["is_ai_voice_assistant_enabled"] = (
+            request_data.get("is_ai_voice_assistant_enabled", "false").lower() == "true"
+        )
 
         try:
             validated_data = CompanyDetails.model_validate(request_data)
@@ -194,7 +206,6 @@ class CompanyMaster:
         except ValidationError as e:
             logger.exception("Validation error while updating company", e)
             return {"is_successful": False, "message": "Invalid or incomplete request data."}, HTTPStatus.BAD_REQUEST
-
 
         updated_data = validated_data.model_dump()
         updated_data.pop("company_code", None)
@@ -380,4 +391,3 @@ class CompanyMaster:
             "is_successful": True,
             "companies": companies,
         }, HTTPStatus.OK
-

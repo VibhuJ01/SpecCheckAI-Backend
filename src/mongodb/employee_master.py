@@ -128,7 +128,6 @@ class EmployeeMaster:
             "message": "Successfully Fetched the Data!",
         }, HTTPStatus.OK
 
-
     def disable_employee(
         self, disable_user_email: str, current_user_email: str, company_admin_email: str
     ) -> tuple[dict, int]:
