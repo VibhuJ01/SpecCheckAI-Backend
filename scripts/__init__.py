@@ -40,7 +40,7 @@ def create_app():
     ]
     if Credentials.environment != Environments.PRODUCTION:
         allowed_origins.extend(["http://localhost:3000", "https://speccheckaiuat.iappc.in"])
-    # app.add_middleware(OriginValidationMiddleware, allowed_origins=allowed_origins)
+    app.add_middleware(OriginValidationMiddleware, allowed_origins=allowed_origins)
 
     # CORS setup
     app.add_middleware(
@@ -76,14 +76,16 @@ def create_app():
 
     from scripts.authentication import router as authentication
     from scripts.company_master import router as company_master
-    from scripts.employee_master import router as employee_master
     from scripts.log_manager import router as log_master
+    from scripts.masters.client_master import router as client_master
+    from scripts.masters.employee_master import router as employee_master
     from scripts.super_admin_master import router as super_admin_master
 
     app.include_router(authentication, prefix=prefix)
     app.include_router(super_admin_master, prefix=prefix + "/super_admin_master")
     app.include_router(employee_master, prefix=prefix + "/employee_master")
     app.include_router(company_master, prefix=prefix + "/company_master")
+    app.include_router(client_master, prefix=prefix + "/client_master")
     app.include_router(log_master, prefix=prefix + "/log_manager")
 
     return app

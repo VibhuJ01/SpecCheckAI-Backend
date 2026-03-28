@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query, Request
 from fastapi.responses import JSONResponse
 
 from src.enums import MongoCollectionsNames
-from src.mongodb.employee_master import EmployeeMaster
+from src.mongodb.masters.employee_master import EmployeeMaster
 from src.utils import (
     employee_edit_permission,
     employee_page_permission,
