@@ -90,6 +90,12 @@ class EmployeeDetails(BaseModel):
     permissions: EmployeePermissions
 
 
+# Team Master
+class TeamDetails(BaseModel):
+    team_name: str = Field(..., max_length=50)
+    team_description: str = Field(..., max_length=100)
+
+
 # Client Master
 class ClientDetails(BaseModel):
     legal_name: str = Field(..., max_length=100)

@@ -80,6 +80,7 @@ def create_app():
     from scripts.log_manager import router as log_master
     from scripts.masters.client_master import router as client_master
     from scripts.masters.employee_master import router as employee_master
+    from scripts.masters.team_master import router as team_master
     from scripts.super_admin_master import router as super_admin_master
 
     app.include_router(authentication, prefix=prefix)
@@ -87,6 +88,7 @@ def create_app():
     app.include_router(employee_master, prefix=prefix + "/employee_master")
     app.include_router(company_master, prefix=prefix + "/company_master")
     app.include_router(client_master, prefix=prefix + "/client_master")
+    app.include_router(team_master, prefix=prefix + "/team_master")
     app.include_router(log_master, prefix=prefix + "/log_manager")
     app.include_router(general_config, prefix=prefix + "/general_config")
 
