@@ -1,7 +1,7 @@
 from typing import Optional
 
 from fastapi import APIRouter, Query, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 
 from src.enums import MongoCollectionsNames
 from src.mongodb.masters.client_master import ClientMaster
@@ -66,3 +66,21 @@ async def delete_client(
         company_admin_email=decoded_data["email"],
     )
     return JSONResponse(response_data, status_code=status_code)
+
+
+@router.get("/download_clients_csv")
+@requires_verification
+@employee_page_permission(page_name=MongoCollectionsNames.CLIENT_MASTER)
+async def download_clients_csv(request: Request, decoded_data: dict = {}):
+
+    response_data, status_code = client_master_db.download_client_as_csv(company_admin_email=decoded_data["email"])
+
+    if status_code != 200:
+        return JSONResponse(response_data, status_code=status_code)
+
+    return Response(
+        content=response_data["csv_data"],
+        media_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="clients.csv"'},
+        status_code=status_code,
+    )

@@ -17,6 +17,7 @@ class MongoCollectionsNames(str, Enum):
     LOG_MANAGER = "log_manager"
     COMPANY_MASTER = "company_master"
     CLIENT_MASTER = "client_master"
+    GENERAL_CONFIG = "general_config"
 
     # Just for Permissions
     EMPLOYEE_MASTER = "employee_master"

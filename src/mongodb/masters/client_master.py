@@ -180,3 +180,40 @@ class ClientMaster:
             "is_successful": True,
             "message": "Client deleted successfully.",
         }, HTTPStatus.OK
+
+    def download_client_as_csv(self, company_admin_email: str) -> tuple[dict[str, Any], int]:
+        """Download all client details as a CSV file. All fields"""
+
+        clients = list(
+            self.collection.find(
+                {"company_admin_email": company_admin_email},
+                {
+                    "_id": 0,
+                    "client_code": 1,
+                    **{field: 1 for field in ClientDetails.model_fields},
+                },
+            )
+        )
+        if not clients:
+            return {
+                "is_successful": False,
+                "message": "No clients found to download.",
+            }, HTTPStatus.NOT_FOUND
+
+        csv_data = []
+        header = list(ClientDetails.model_fields.keys())
+        csv_data.append(header)
+        for client in clients:
+            row = []
+            for field in ClientDetails.model_fields.keys():
+                row.append(client.get(field, ""))
+            csv_data.append(row)
+
+        csv_string = ""
+        for row in csv_data:
+            csv_string += ",".join(str(value).replace('"', '""') for value in row) + "\n"
+
+        return {
+            "is_successful": True,
+            "csv_data": csv_string,
+        }, HTTPStatus.OK
