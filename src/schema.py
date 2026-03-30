@@ -129,7 +129,7 @@ class ClientDetails(BaseModel):
     ifsc_code: Optional[str] = Field(None, max_length=30)
 
 
-# AI Card Analyser
+# AI Analyser
 class Examples(BaseModel):
     user_prompt: Union[str, list]
     completion: dict
