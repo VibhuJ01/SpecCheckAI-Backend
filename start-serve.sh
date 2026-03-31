@@ -21,7 +21,7 @@ done
 echo "Starting Uvicorn with $WORKERS worker(s) on port 5001..."
 gunicorn app:app \
     --worker-class uvicorn.workers.UvicornWorker \
-    --bind 127.0.0.1:5010 \
+    --bind 127.0.0.1:5001 \
     --workers "$WORKERS" \
     --max-requests 1000 \
     --max-requests-jitter 50 \
