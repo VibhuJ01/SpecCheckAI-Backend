@@ -381,11 +381,11 @@ class CompanyMaster:
                 "$project": {
                     "_id": 0,
                     "company_code": 1,
+                    "is_disabled": 1,
                     **{field: 1 for field in CompanyDetails.model_fields},
                 }
             },
         ]
-
         companies = list(self.collection.aggregate(pipeline))
         return {
             "is_successful": True,
