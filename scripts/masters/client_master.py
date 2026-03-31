@@ -24,7 +24,7 @@ async def add_client(request: Request, decoded_data: dict = {}):
     response_data, status_code = client_master_db.add_client(
         request_data=request_data,
         current_user_email=decoded_data["email"],
-        company_admin_email=decoded_data["email"],
+        company_admin_email=decoded_data["company_admin_email"],
     )
     return JSONResponse(response_data, status_code=status_code)
 
@@ -38,7 +38,7 @@ async def update_client(request: Request, decoded_data: dict = {}):
     response_data, status_code = client_master_db.update_client(
         request_data=request_data,
         current_user_email=decoded_data["email"],
-        company_admin_email=decoded_data["email"],
+        company_admin_email=decoded_data["company_admin_email"],
     )
     return JSONResponse(response_data, status_code=status_code)
 
@@ -47,7 +47,9 @@ async def update_client(request: Request, decoded_data: dict = {}):
 @requires_verification
 @employee_page_permission(page_name=MongoCollectionsNames.CLIENT_MASTER)
 async def fetch_all_clients(request: Request, decoded_data: dict = {}):
-    response_data, status_code = client_master_db.fetch_all_clients(company_admin_email=decoded_data["email"])
+    response_data, status_code = client_master_db.fetch_all_clients(
+        company_admin_email=decoded_data["company_admin_email"]
+    )
     return JSONResponse(response_data, status_code=status_code)
 
 
@@ -63,7 +65,7 @@ async def delete_client(
     response_data, status_code = client_master_db.delete_client(
         client_code=client_code.strip(),
         current_user_email=decoded_data["email"],
-        company_admin_email=decoded_data["email"],
+        company_admin_email=decoded_data["company_admin_email"],
     )
     return JSONResponse(response_data, status_code=status_code)
 
@@ -73,7 +75,9 @@ async def delete_client(
 @employee_page_permission(page_name=MongoCollectionsNames.CLIENT_MASTER)
 async def download_clients_csv(request: Request, decoded_data: dict = {}):
 
-    response_data, status_code = client_master_db.download_client_as_csv(company_admin_email=decoded_data["email"])
+    response_data, status_code = client_master_db.download_client_as_csv(
+        company_admin_email=decoded_data["company_admin_email"]
+    )
 
     if status_code != 200:
         return JSONResponse(response_data, status_code=status_code)
