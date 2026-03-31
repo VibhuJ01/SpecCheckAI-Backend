@@ -1,8 +1,8 @@
 from typing import Optional, Union
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field
 
-from src.enums import EmployeePermissionType
+from src.enums import EmployeePermissionType, StandardLimitType, TeamLabAnalystType
 
 
 class UserLoginRequest(BaseModel):
@@ -121,6 +121,24 @@ class SpecificationMatrixDetails(BaseModel):
     product_name: str = Field(..., max_length=100)
     product_description: str = Field(..., max_length=100)
     product_category: str = Field(..., max_length=200)
+
+
+class StandardInSpecificationRequest(BaseModel):
+    specification_code: str
+    standard_name: str = Field(..., max_length=100)
+    limit_type: StandardLimitType
+    standard_limit_max: Optional[float]
+    standard_limit_min: Optional[float]
+    standard_limit_others: Optional[str] = Field("", max_length=100)
+    unit: Optional[str] = Field("", max_length=50)
+    test_method: Optional[str] = Field("", max_length=100)
+    is_nabl_approved: bool = False
+    testing_parameter: Optional[str] = Field("", max_length=100)
+    discipline: Optional[str] = Field("", max_length=100)
+    group: Optional[str] = Field("", max_length=100)
+    sub_group: Optional[str] = Field("", max_length=200)
+    team_lab_analyst: str = Field("", max_length=100)
+    team_lab_analyst_type: TeamLabAnalystType = TeamLabAnalystType.NOT_SPECIFIED
 
 
 # Client Master

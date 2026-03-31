@@ -19,6 +19,7 @@ class MongoCollectionsNames(str, Enum):
     DEPARTMENT_MASTER = "department_master"
     TEAM_MASTER = "team_master"
     SPECIFICATION_MATRIX = "specification_matrix"
+    STANDARD_MASTER = "standard_master"
     CLIENT_MASTER = "client_master"
     LOG_MANAGER = "log_manager"
 
@@ -58,3 +59,16 @@ class LogActionType(str, Enum):
     DISABLE = "disable"
     ENABLE = "enable"
     UPLOADED = "uploaded"
+
+
+class StandardLimitType(str, Enum):
+    MAX = "max"
+    MIN = "min"
+    RANGE = "range"
+    OTHERS = "others"
+
+
+class TeamLabAnalystType(str, Enum):
+    EMPLOYEE = "employee"
+    TEAM = "team"
+    NOT_SPECIFIED = "not_specified"
