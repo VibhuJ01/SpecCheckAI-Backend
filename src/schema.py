@@ -113,6 +113,13 @@ class TeamDetails(BaseModel):
     team_description: str = Field(..., max_length=100)
 
 
+# Specification Matrix
+class SpecificationMatrixDetails(BaseModel):
+    product_name: str = Field(..., max_length=100)
+    product_description: str = Field(..., max_length=100)
+    product_category: str = Field(..., max_length=200)
+
+
 # Client Master
 class ClientDetails(BaseModel):
     legal_name: str = Field(..., max_length=100)

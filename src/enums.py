@@ -18,6 +18,7 @@ class MongoCollectionsNames(str, Enum):
     GENERAL_CONFIG = "general_config"
     DEPARTMENT_MASTER = "department_master"
     TEAM_MASTER = "team_master"
+    SPECIFICATION_MATRIX = "specification_matrix"
     CLIENT_MASTER = "client_master"
     LOG_MANAGER = "log_manager"
 
