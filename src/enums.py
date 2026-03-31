@@ -14,11 +14,12 @@ class AuthTokenType(str, Enum):
 
 class MongoCollectionsNames(str, Enum):
     USER_MASTER = "user_master"
-    LOG_MANAGER = "log_manager"
     COMPANY_MASTER = "company_master"
-    CLIENT_MASTER = "client_master"
-    TEAM_MASTER = "team_master"
     GENERAL_CONFIG = "general_config"
+    DEPARTMENT_MASTER = "department_master"
+    TEAM_MASTER = "team_master"
+    CLIENT_MASTER = "client_master"
+    LOG_MANAGER = "log_manager"
 
     # Just for Permissions
     EMPLOYEE_MASTER = "employee_master"

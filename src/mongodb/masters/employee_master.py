@@ -54,6 +54,8 @@ class EmployeeMaster:
         extra_data = {
             "permissions": employee_data["permissions"],
             "company_admin_email": company_admin_email,
+            "created_at": datetime.now(timezone.utc),
+            "created_by": current_user_email,
         }
 
         user_creation = create_user_and_send_email(

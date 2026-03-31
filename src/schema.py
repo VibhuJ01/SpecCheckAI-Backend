@@ -90,6 +90,23 @@ class EmployeeDetails(BaseModel):
     permissions: EmployeePermissions
 
 
+# Department Master
+class DepartmentDetails(BaseModel):
+    department_name: str = Field(..., max_length=50)
+    description: Optional[str] = Field(None, max_length=100)
+
+    sample_code_prefix: str = Field(..., max_length=10)
+    sample_number_length: int
+    sample_code_suffix: str = Field(..., max_length=10)
+    sample_code_starting_number: int
+    sample_date_format: Optional[str] = Field(None, max_length=20)
+
+    ulr_prefix: str = Field(..., max_length=10)
+    ulr_number_length: int
+    ulr_suffix: str = Field(..., max_length=10)
+    ulr_starting_number: int
+
+
 # Team Master
 class TeamDetails(BaseModel):
     team_name: str = Field(..., max_length=50)
