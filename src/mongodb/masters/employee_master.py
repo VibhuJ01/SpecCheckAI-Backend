@@ -15,16 +15,48 @@ class EmployeeMaster:
 
     collection = BaseDatabase.get_collection(collection_name=MongoCollectionsNames.USER_MASTER)
     company_collection = BaseDatabase.get_collection(collection_name=MongoCollectionsNames.COMPANY_MASTER)
+    department_collection = BaseDatabase.get_collection(collection_name=MongoCollectionsNames.DEPARTMENT_MASTER)
+    team_master_collection = BaseDatabase.get_collection(collection_name=MongoCollectionsNames.TEAM_MASTER)
 
     def is_user_exists(self, email: str) -> bool:
         user_exists = self.collection.find_one({"email": email.lower()})
         return user_exists is not None
+
+    def do_all_department_exists(self, department_codes: list[str], company_admin_email: str) -> bool:
+        existing_departments_count = self.department_collection.count_documents(
+            {"department_code": {"$in": department_codes}, "company_admin_email": company_admin_email}
+        )
+        return existing_departments_count == len(department_codes)
+
+    def do_all_teams_exist(self, team_codes: list[str], company_admin_email: str) -> bool:
+        existing_teams_count = self.team_master_collection.count_documents(
+            {"team_code": {"$in": team_codes}, "company_admin_email": company_admin_email}
+        )
+        return existing_teams_count == len(team_codes)
 
     def add_employee(self, request_data: dict, current_user_email: str, company_admin_email: str) -> tuple[dict, int]:
         try:
             validated_request_data = EmployeeDetails.model_validate(request_data)
         except ValidationError:
             return {"is_successful": False, "message": "Invalid or incomplete request data."}, HTTPStatus.BAD_REQUEST
+
+        if len(set(validated_request_data.department_codes)) != len(validated_request_data.department_codes):
+            validated_request_data.department_codes = list(set(validated_request_data.department_codes))
+
+        if not self.do_all_department_exists(validated_request_data.department_codes, company_admin_email):
+            return {
+                "is_successful": False,
+                "message": f"One or more department codes are invalid. Please check and try again.",
+            }, HTTPStatus.BAD_REQUEST
+
+        if len(set(validated_request_data.team_codes)) != len(validated_request_data.team_codes):
+            validated_request_data.team_codes = list(set(validated_request_data.team_codes))
+
+        if not self.do_all_teams_exist(validated_request_data.team_codes, company_admin_email):
+            return {
+                "is_successful": False,
+                "message": f"One or more team codes are invalid. Please check and try again.",
+            }, HTTPStatus.BAD_REQUEST
 
         company = self.company_collection.find_one({"email": company_admin_email})
         if not company:
@@ -56,6 +88,8 @@ class EmployeeMaster:
             "company_admin_email": company_admin_email,
             "created_at": datetime.now(timezone.utc),
             "created_by": current_user_email,
+            "department_codes": employee_data["department_codes"],
+            "team_codes": employee_data["team_codes"],
         }
 
         user_creation = create_user_and_send_email(
@@ -92,6 +126,24 @@ class EmployeeMaster:
         except ValidationError:
             return {"is_successful": False, "message": "Invalid or incomplete request data."}, HTTPStatus.BAD_REQUEST
 
+        if len(set(validated_request_data.department_codes)) != len(validated_request_data.department_codes):
+            validated_request_data.department_codes = list(set(validated_request_data.department_codes))
+
+        if not self.do_all_department_exists(validated_request_data.department_codes, company_admin_email):
+            return {
+                "is_successful": False,
+                "message": f"Department with codes '{validated_request_data.department_codes}' do not exist.",
+            }, HTTPStatus.BAD_REQUEST
+
+        if len(set(validated_request_data.team_codes)) != len(validated_request_data.team_codes):
+            validated_request_data.team_codes = list(set(validated_request_data.team_codes))
+
+        if not self.do_all_teams_exist(validated_request_data.team_codes, company_admin_email):
+            return {
+                "is_successful": False,
+                "message": f"One or more team codes are invalid. Please check and try again.",
+            }, HTTPStatus.BAD_REQUEST
+
         update_data = validated_request_data.model_dump()
         employee_email = update_data.pop("email")
 
@@ -120,7 +172,7 @@ class EmployeeMaster:
         users = list(
             self.collection.find(
                 {"role": UserRoles.EMPLOYEE.value, "company_admin_email": company_admin_email},
-                {"_id": 0, "is_disabled": 1, "code": 1, "email": 1, "name": 1, "phone_number": 1, "permissions": 1},
+                {"_id": 0, "is_disabled": 1, "code": 1, **{field: 1 for field in EmployeeDetails.model_fields}},
             )
         )
 

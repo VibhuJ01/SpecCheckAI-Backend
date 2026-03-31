@@ -89,6 +89,9 @@ class EmployeeDetails(BaseModel):
     phone_number: str = Field(..., max_length=30)
     permissions: EmployeePermissions
 
+    department_codes: list[str] = Field(..., min_length=1)
+    team_codes: list[str] = Field(..., min_length=1)
+
 
 # Department Master
 class DepartmentDetails(BaseModel):

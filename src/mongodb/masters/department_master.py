@@ -38,7 +38,7 @@ class DepartmentMaster:
         data_to_insert.update(
             {
                 "department_code": str(uuid4()),
-                "customer_admin_code": company_admin_email,
+                "company_admin_email": company_admin_email,
                 "created_at": datetime.now(pytz.utc),
                 "updated_at": datetime.now(pytz.utc),
             }
@@ -84,7 +84,7 @@ class DepartmentMaster:
         update_data["updated_by"] = current_user_email
 
         result = self.collection.update_one(
-            {"department_code": department_code, "customer_admin_code": company_admin_email},
+            {"department_code": department_code, "company_admin_email": company_admin_email},
             {"$set": update_data},
         )
 
@@ -105,7 +105,7 @@ class DepartmentMaster:
     def fetch_departments(self, company_admin_email: str) -> tuple[dict[str, Any], int]:
         departments = list(
             self.collection.find(
-                {"customer_admin_code": company_admin_email},
+                {"company_admin_email": company_admin_email},
                 {"_id": 0, "department_code": 1, **{field: 1 for field in DepartmentDetails.model_fields}},
             )
         )
