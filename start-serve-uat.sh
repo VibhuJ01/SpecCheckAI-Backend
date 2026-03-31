@@ -19,4 +19,13 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 echo "Starting Uvicorn with $WORKERS worker(s) on port 5001..."
-uvicorn app:app --host 127.0.0.1 --port 5001 --workers "$WORKERS"
+gunicorn app:app \
+    --worker-class uvicorn.workers.UvicornWorker \
+    --bind 127.0.0.1:5010 \
+    --workers "$WORKERS" \
+    --max-requests 1000 \
+    --max-requests-jitter 50 \
+    --timeout 60 \
+    --keep-alive 5 \
+    --access-logfile - \
+    --error-logfile -
