@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from http import HTTPStatus
+from typing import Any
 
 from pydantic import ValidationError
 from pymongo import ReturnDocument
@@ -17,6 +18,9 @@ class EmployeeMaster:
     company_collection = BaseDatabase.get_collection(collection_name=MongoCollectionsNames.COMPANY_MASTER)
     department_collection = BaseDatabase.get_collection(collection_name=MongoCollectionsNames.DEPARTMENT_MASTER)
     team_master_collection = BaseDatabase.get_collection(collection_name=MongoCollectionsNames.TEAM_MASTER)
+    employee_signature_collection = BaseDatabase.get_collection(
+        collection_name=MongoCollectionsNames.EMPLOYEE_SIGNATURES
+    )
 
     def is_user_exists(self, email: str) -> bool:
         user_exists = self.collection.find_one({"email": email.lower()})
@@ -277,3 +281,126 @@ class EmployeeMaster:
             "is_successful": True,
             "message": f"Employee with email '{enable_user_email}' has been enabled.",
         }, HTTPStatus.OK
+
+    # ───────────────────── Employee Signature ─────────────────────
+
+    def _validate_signature_fields(self, designation: str, dept_team_name: str) -> tuple[bool, str]:
+        if len(designation) > 50:
+            return False, "Designation cannot exceed 50 characters."
+        if len(dept_team_name) > 50:
+            return False, "Department or team name cannot exceed 50 characters."
+        return True, ""
+
+    def upsert_employee_signature(
+        self,
+        employee_email: str,
+        designation: str,
+        dept_team_name: str,
+        current_user_email: str,
+        company_admin_email: str,
+        signature_file: Any = None,
+    ) -> tuple[dict, int]:
+        employee_email = employee_email.lower()
+
+        if not self.collection.find_one({"email": employee_email, "company_admin_email": company_admin_email}):
+            return {"is_successful": False, "message": "Employee not found."}, HTTPStatus.NOT_FOUND
+
+        valid, msg = self._validate_signature_fields(designation, dept_team_name)
+        if not valid:
+            return {"is_successful": False, "message": msg}, HTTPStatus.BAD_REQUEST
+
+        now = datetime.now(timezone.utc)
+        set_data = {
+            "designation": designation,
+            "dept_team_name": dept_team_name,
+            "updated_at": now,
+            "updated_by": current_user_email,
+        }
+
+        try:
+            from src.mongodb.general_config import GeneralConfigManager
+
+            set_data["signature_data"] = GeneralConfigManager().save_image_to_base64(signature_file)
+        except ValueError as ve:
+            return {"is_successful": False, "message": f"Invalid signature file: {str(ve)}"}, HTTPStatus.BAD_REQUEST
+
+        except Exception as e:
+            return {
+                "is_successful": False,
+                "message": f"An error occurred while processing the signature file.",
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
+
+        result = self.employee_signature_collection.update_one(
+            {"employee_email": employee_email, "company_admin_email": company_admin_email},
+            {
+                "$set": set_data,
+                "$setOnInsert": {
+                    "employee_email": employee_email,
+                    "company_admin_email": company_admin_email,
+                    "created_at": now,
+                    "created_by": current_user_email,
+                },
+            },
+            upsert=True,
+        )
+
+        is_insert = result.upserted_id is not None
+        LogManager.add_log(
+            current_user_email=current_user_email,
+            company_admin_email=company_admin_email,
+            log_action_type=LogActionType.ADD if is_insert else LogActionType.EDIT,
+            message=f"{'ADDED' if is_insert else 'UPDATED'} employee signature for {employee_email}.",
+        )
+
+        msg = "Employee signature added successfully." if is_insert else "Employee signature updated successfully."
+        return {"is_successful": True, "message": msg}, HTTPStatus.OK
+
+    def fetch_employee_signature(self, employee_email: str, company_admin_email: str) -> tuple[dict, int]:
+        try:
+            record = self.employee_signature_collection.find_one(
+                {"employee_email": employee_email.lower(), "company_admin_email": company_admin_email},
+                {"_id": 0, "employee_email": 1, "designation": 1, "dept_team_name": 1, "signature_data": 1},
+            )
+
+            if record:
+                return (
+                    {"is_successful": True, **record, "message": "Employee signature fetched successfully."},
+                    HTTPStatus.OK,
+                )
+
+            return (
+                {"is_successful": False, "message": "Employee signature not found."},
+                HTTPStatus.NOT_FOUND,
+            )
+        except Exception as e:
+            return (
+                {"is_successful": False, "message": f"An error occurred while fetching employee signature: {str(e)}"},
+                HTTPStatus.INTERNAL_SERVER_ERROR,
+            )
+
+    def delete_employee_signature(
+        self, employee_email: str, current_user_email: str, company_admin_email: str
+    ) -> tuple[dict, int]:
+        try:
+            result = self.employee_signature_collection.delete_one(
+                {"employee_email": employee_email.lower(), "company_admin_email": company_admin_email}
+            )
+
+            if result.deleted_count > 0:
+                LogManager.add_log(
+                    current_user_email=current_user_email,
+                    company_admin_email=company_admin_email,
+                    log_action_type=LogActionType.DELETE,
+                    message=f"DELETED employee signature for {employee_email.lower()}.",
+                )
+                return {"is_successful": True, "message": "Employee signature deleted successfully."}, HTTPStatus.OK
+
+            return (
+                {"is_successful": False, "message": "Employee signature not found."},
+                HTTPStatus.NOT_FOUND,
+            )
+        except Exception as e:
+            return (
+                {"is_successful": False, "message": f"An error occurred while deleting employee signature: {str(e)}"},
+                HTTPStatus.INTERNAL_SERVER_ERROR,
+            )

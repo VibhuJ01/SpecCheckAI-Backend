@@ -22,6 +22,8 @@ class MongoCollectionsNames(str, Enum):
     CLIENT_MASTER = "client_master"
     LOG_MANAGER = "log_manager"
 
+    EMPLOYEE_SIGNATURES = "employee_signatures"
+
     # Just for Permissions
     EMPLOYEE_MASTER = "employee_master"
 

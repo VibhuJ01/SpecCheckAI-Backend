@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Query, Request
+from typing import Optional
+
+from fastapi import APIRouter, File, Form, Query, Request, UploadFile
 from fastapi.responses import JSONResponse
 
 from src.enums import MongoCollectionsNames
@@ -73,6 +75,62 @@ async def disable_employee(
 ):
     response_data, status_code = employee_master_db.disable_employee(
         disable_user_email=employee_to_disable_email,
+        current_user_email=decoded_data["email"],
+        company_admin_email=decoded_data["company_admin_email"],
+    )
+    return JSONResponse(response_data, status_code=status_code)
+
+
+# ───────────────────── Employee Signature ─────────────────────
+
+
+@router.post("/upsert_employee_signature")
+@requires_verification
+@employee_edit_permission(page_name=MongoCollectionsNames.EMPLOYEE_MASTER)
+async def upsert_employee_signature(
+    request: Request,
+    employee_email: str = Form(..., description="Email of the employee"),
+    designation: str = Form(..., max_length=50, description="Employee designation (max 50 chars)"),
+    dept_team_name: str = Form(..., max_length=50, description="Department or team name (max 50 chars)"),
+    signature_file: Optional[UploadFile] = File(None, description="Signature image (JPG/PNG, max 500x500, 1 MB)"),
+    decoded_data: dict = {},
+):
+    response_data, status_code = employee_master_db.upsert_employee_signature(
+        employee_email=employee_email,
+        designation=designation,
+        dept_team_name=dept_team_name,
+        current_user_email=decoded_data["email"],
+        company_admin_email=decoded_data["company_admin_email"],
+        signature_file=signature_file,
+    )
+    return JSONResponse(response_data, status_code=status_code)
+
+
+@router.get("/fetch_employee_signature")
+@requires_verification
+@employee_page_permission(page_name=MongoCollectionsNames.EMPLOYEE_MASTER)
+async def fetch_employee_signature(
+    request: Request,
+    employee_email: str = Query(..., description="Email of the employee"),
+    decoded_data: dict = {},
+):
+    response_data, status_code = employee_master_db.fetch_employee_signature(
+        employee_email=employee_email,
+        company_admin_email=decoded_data["company_admin_email"],
+    )
+    return JSONResponse(response_data, status_code=status_code)
+
+
+@router.delete("/delete_employee_signature")
+@requires_verification
+@employee_edit_permission(page_name=MongoCollectionsNames.EMPLOYEE_MASTER)
+async def delete_employee_signature(
+    request: Request,
+    employee_email: str = Query(..., description="Email of the employee"),
+    decoded_data: dict = {},
+):
+    response_data, status_code = employee_master_db.delete_employee_signature(
+        employee_email=employee_email,
         current_user_email=decoded_data["email"],
         company_admin_email=decoded_data["company_admin_email"],
     )
