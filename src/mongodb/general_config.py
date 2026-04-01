@@ -118,6 +118,7 @@ class GeneralConfigManager:
                     {
                         "is_successful": True,
                         "email": smtp_details["email"],
+                        "provider": smtp_details["provider"],
                         "message": "SMTP Email successfully fetched.",
                     },
                     HTTPStatus.OK,

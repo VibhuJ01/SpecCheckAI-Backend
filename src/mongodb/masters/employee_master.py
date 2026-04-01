@@ -38,6 +38,35 @@ class EmployeeMaster:
         )
         return existing_teams_count == len(team_codes)
 
+    def fetch_departments_dropdown(self, company_admin_email: str) -> tuple[dict[str, Any], int]:
+        departments = list(
+            self.department_collection.find(
+                {"company_admin_email": company_admin_email},
+                {"_id": 0, "department_code": 1, "department_name": 1, "description": 1},
+            )
+        )
+
+        return {
+            "is_successful": True,
+            "departments": departments,
+            "message": "Departments fetched successfully.",
+        }, HTTPStatus.OK
+
+    def fetch_teams_dropdown(self, company_admin_email: str) -> tuple[dict[str, Any], int]:
+        """Fetch all teams for a specific company admin."""
+
+        teams = list(
+            self.team_master_collection.find(
+                {"company_admin_email": company_admin_email},
+                {"_id": 0, "team_code": 1, "team_name": 1, "team_description": 1},
+            )
+        )
+
+        return {
+            "is_successful": True,
+            "teams": teams,
+        }, HTTPStatus.OK
+
     def add_employee(self, request_data: dict, current_user_email: str, company_admin_email: str) -> tuple[dict, int]:
         try:
             validated_request_data = EmployeeDetails.model_validate(request_data)
@@ -172,19 +201,81 @@ class EmployeeMaster:
         return {"is_successful": False, "message": "Employee not found"}, HTTPStatus.NOT_FOUND
 
     def fetch_all_employees(self, company_admin_email: str) -> tuple[dict, int]:
+        pipeline = [
+            {"$match": {"company_admin_email": company_admin_email, "role": UserRoles.EMPLOYEE.value}},
+            {
+                "$lookup": {
+                    "from": MongoCollectionsNames.DEPARTMENT_MASTER.value,
+                    "let": {
+                        "department_codes": "$department_codes",
+                        "company_admin_email": "$company_admin_email",
+                    },
+                    "pipeline": [
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$and": [
+                                        {"$in": ["$department_code", {"$ifNull": ["$$department_codes", []]}]},
+                                        {"$eq": ["$company_admin_email", "$$company_admin_email"]},
+                                    ]
+                                }
+                            }
+                        },
+                        {"$project": {"_id": 0, "department_code": 1, "department_name": 1, "description": 1}},
+                    ],
+                    "as": "departments",
+                }
+            },
+            {
+                "$lookup": {
+                    "from": MongoCollectionsNames.TEAM_MASTER.value,
+                    "let": {
+                        "team_codes": "$team_codes",
+                        "company_admin_email": "$company_admin_email",
+                    },
+                    "pipeline": [
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$and": [
+                                        {"$in": ["$team_code", {"$ifNull": ["$$team_codes", []]}]},
+                                        {"$eq": ["$company_admin_email", "$$company_admin_email"]},
+                                    ]
+                                }
+                            }
+                        },
+                        {"$project": {"_id": 0, "team_code": 1, "team_name": 1, "team_description": 1}},
+                    ],
+                    "as": "teams",
+                }
+            },
+            {
+                "$project": {
+                    "_id": 0,
+                    "name": 1,
+                    "email": 1,
+                    "phone_number": 1,
+                    "permissions": 1,
+                    "departments": 1,
+                    "teams": 1,
+                    "is_disabled": 1,
+                }
+            },
+            {"$sort": {"name": 1}},
+        ]
 
-        users = list(
-            self.collection.find(
-                {"role": UserRoles.EMPLOYEE.value, "company_admin_email": company_admin_email},
-                {"_id": 0, "is_disabled": 1, "code": 1, **{field: 1 for field in EmployeeDetails.model_fields}},
-            )
-        )
-
-        return {
-            "is_successful": True,
-            "user_data": users,
-            "message": "Successfully Fetched the Data!",
-        }, HTTPStatus.OK
+        try:
+            employees = list(self.collection.aggregate(pipeline))
+            return {
+                "is_successful": True,
+                "employees": employees,
+                "message": "Employees fetched successfully.",
+            }, HTTPStatus.OK
+        except Exception as e:
+            return {
+                "is_successful": False,
+                "message": f"An error occurred while fetching employees: {str(e)}",
+            }, HTTPStatus.INTERNAL_SERVER_ERROR
 
     def disable_employee(
         self, disable_user_email: str, current_user_email: str, company_admin_email: str
@@ -308,6 +399,12 @@ class EmployeeMaster:
         valid, msg = self._validate_signature_fields(designation, dept_team_name)
         if not valid:
             return {"is_successful": False, "message": msg}, HTTPStatus.BAD_REQUEST
+
+        if len(dept_team_name) > 50 and len(designation) > 50:
+            return {
+                "is_successful": False,
+                "message": "Both Designation and Department/Team name cannot exceed 50 characters.",
+            }, HTTPStatus.BAD_REQUEST
 
         now = datetime.now(timezone.utc)
         set_data = {

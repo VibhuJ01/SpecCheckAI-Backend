@@ -84,9 +84,9 @@ class EmployeePermissions(BaseModel):
 
 
 class EmployeeDetails(BaseModel):
-    name: str = Field(..., max_length=80)
-    email: str = Field(..., max_length=80)
-    phone_number: str = Field(..., max_length=30)
+    name: str = Field(..., max_length=100)
+    email: str = Field(..., max_length=300)
+    phone_number: str = Field(..., max_length=20)
     permissions: EmployeePermissions
 
     department_codes: list[str] = Field(..., min_length=1)

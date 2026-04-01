@@ -81,6 +81,26 @@ async def disable_employee(
     return JSONResponse(response_data, status_code=status_code)
 
 
+@router.get("/fetch_departments_dropdown")
+@requires_verification
+@employee_edit_permission(page_name=MongoCollectionsNames.EMPLOYEE_MASTER)
+async def fetch_departments_dropdown(request: Request, decoded_data: dict = {}):
+    response_data, status_code = employee_master_db.fetch_departments_dropdown(
+        company_admin_email=decoded_data["company_admin_email"]
+    )
+    return JSONResponse(response_data, status_code=status_code)
+
+
+@router.get("/fetch_teams_dropdown")
+@requires_verification
+@employee_edit_permission(page_name=MongoCollectionsNames.EMPLOYEE_MASTER)
+async def fetch_teams_dropdown(request: Request, decoded_data: dict = {}):
+    response_data, status_code = employee_master_db.fetch_teams_dropdown(
+        company_admin_email=decoded_data["company_admin_email"]
+    )
+    return JSONResponse(response_data, status_code=status_code)
+
+
 # ───────────────────── Employee Signature ─────────────────────
 
 
